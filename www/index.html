@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+	<!-- Change this if you want to allow scaling -->
+    <meta name="viewport" content="width=default-width; user-scalable=no" />
+
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+    <title>cocos-gap-test</title>
+	
+	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+    <script type="text/javascript" charset="utf-8" src="gamegap.js"></script>
+	
+	
+    <script type="text/javascript" charset="utf-8">
+
+
+	var x = 10;
+	var y = 50;
+	var ydir = 2;
+	
+	var backLeft = 600;
+	
+	function onBodyLoad()
+	{
+		document.addEventListener("deviceready",onDeviceReady,false);
+	}
+	
+	/* When this function is called, PhoneGap has been initialized and is ready to roll */
+	function onDeviceReady()
+	{
+		// do your thing!
+	}
+    function showGameView()
+	{
+		PhoneGap.exec('GameGap.initAndDisplayGameView',320,480);
+
+		// Add the background last, to force it's Z order incorrectly
+		// in order to test the setZorder functionality.
+		PhoneGap.exec('GameGap.createSprite', 'key1', 50,44,'cube1.png');
+		PhoneGap.exec('GameGap.createSprite', 'key2', 1000,336,'background1.png');
+
+		PhoneGap.exec('GameGap.setSpriteZOrder', 'key1', 30);
+		PhoneGap.exec('GameGap.setPositions','key2',0,330);
+		
+		PhoneGap.exec('GameGap.createSprite', 'key3', 50,44,'cube1.png');
+		PhoneGap.exec('GameGap.createSprite', 'key4', 50,44,'cube1.png');
+		PhoneGap.exec('GameGap.createSprite', 'key5', 50,44,'cube1.png');
+		PhoneGap.exec('GameGap.createSprite', 'key6', 50,44,'cube1.png');
+
+		// Note: Setting an interval an running phonegap commands is going
+		// to be SLOW !.  You need to use the callback as in the other examples....
+		// setInterval("runit()",25);
+		PhoneGap.exec('GameGap.startGameCallback');
+
+	}
+	
+	
+	GameGap_NextFrame = function(timeDiff)
+	{
+		y += ydir;
+		var pgCommand = getPhoneGapURL('GameGap.setPositions','key1',x,y, 
+												 'key2', backLeft, 200,
+												 'key3', 320 - x, y - 50,
+												 'key4', 0, 0,
+												 'key5', 150 - x, y - 80,
+												 'key6', x * 1.2, y * 1.3);
+		// You should never do animation this way.
+		// It should always be interval / duration based.
+		x += timeDiff * 600; // pixels per second
+		backLeft --;
+		
+		if ( backLeft < (-1000 + 320) ) backLeft = 1000;
+		if ( x > 350 ) x = 0;
+		if ( y > 450 ) { ydir *= -1; y = 450; }
+		if ( y < 0 ) { ydir *= -1; y = 0; }
+		
+		return pgCommand;
+	}
+	
+	
+    </script>
+  </head>
+  <body onload="onBodyLoad()">
+  	<h3>PhoneGap + Cocos2D test page</h3>
+	
+	<input type="button" value="Kick Off Demo 1" onClick="showGameView()"/>
+	
+	<a href="box2d.html">Box2d javascript demo</a>
+	<br/><br/>
+	<a href="move.html">Open GL Touch Passthrough</a>
+	
+  </body>
+</html>

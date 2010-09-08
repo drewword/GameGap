@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Test</title>
+    <script src="lib/prototype-1.6.0.2.js"></script>
+	<!-- box2djs -->
+    <script src='js/box2d/common/b2Settings.js'></script>
+    <script src='js/box2d/common/math/b2Vec2.js'></script>
+    <script src='js/box2d/common/math/b2Mat22.js'></script>
+    <script src='js/box2d/common/math/b2Math.js'></script>
+    <script src='js/box2d/collision/b2AABB.js'></script>
+    <script src='js/box2d/collision/b2Bound.js'></script>
+    <script src='js/box2d/collision/b2BoundValues.js'></script>
+    <script src='js/box2d/collision/b2Pair.js'></script>
+    <script src='js/box2d/collision/b2PairCallback.js'></script>
+    <script src='js/box2d/collision/b2BufferedPair.js'></script>
+    <script src='js/box2d/collision/b2PairManager.js'></script>
+    <script src='js/box2d/collision/b2BroadPhase.js'></script>
+    <script src='js/box2d/collision/b2Collision.js'></script>
+    <script src='js/box2d/collision/Features.js'></script>
+    <script src='js/box2d/collision/b2ContactID.js'></script>
+    <script src='js/box2d/collision/b2ContactPoint.js'></script>
+    <script src='js/box2d/collision/b2Distance.js'></script>
+    <script src='js/box2d/collision/b2Manifold.js'></script>
+    <script src='js/box2d/collision/b2OBB.js'></script>
+    <script src='js/box2d/collision/b2Proxy.js'></script>
+    <script src='js/box2d/collision/ClipVertex.js'></script>
+    <script src='js/box2d/collision/shapes/b2Shape.js'></script>
+    <script src='js/box2d/collision/shapes/b2ShapeDef.js'></script>
+    <script src='js/box2d/collision/shapes/b2BoxDef.js'></script>
+    <script src='js/box2d/collision/shapes/b2CircleDef.js'></script>
+    <script src='js/box2d/collision/shapes/b2CircleShape.js'></script>
+    <script src='js/box2d/collision/shapes/b2MassData.js'></script>
+    <script src='js/box2d/collision/shapes/b2PolyDef.js'></script>
+    <script src='js/box2d/collision/shapes/b2PolyShape.js'></script>
+    <script src='js/box2d/dynamics/b2Body.js'></script>
+    <script src='js/box2d/dynamics/b2BodyDef.js'></script>
+    <script src='js/box2d/dynamics/b2CollisionFilter.js'></script>
+    <script src='js/box2d/dynamics/b2Island.js'></script>
+    <script src='js/box2d/dynamics/b2TimeStep.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2ContactNode.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2Contact.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2ContactConstraint.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2ContactConstraintPoint.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2ContactRegister.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2ContactSolver.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2CircleContact.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2Conservative.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2NullContact.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2PolyAndCircleContact.js'></script>
+    <script src='js/box2d/dynamics/contacts/b2PolyContact.js'></script>
+    <script src='js/box2d/dynamics/b2ContactManager.js'></script>
+    <script src='js/box2d/dynamics/b2World.js'></script>
+    <script src='js/box2d/dynamics/b2WorldListener.js'></script>
+    <script src='js/box2d/dynamics/joints/b2JointNode.js'></script>
+    <script src='js/box2d/dynamics/joints/b2Joint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2JointDef.js'></script>
+    <script src='js/box2d/dynamics/joints/b2DistanceJoint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2DistanceJointDef.js'></script>
+    <script src='js/box2d/dynamics/joints/b2Jacobian.js'></script>
+    <script src='js/box2d/dynamics/joints/b2GearJoint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2GearJointDef.js'></script>
+    <script src='js/box2d/dynamics/joints/b2MouseJoint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2MouseJointDef.js'></script>
+    <script src='js/box2d/dynamics/joints/b2PrismaticJoint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2PrismaticJointDef.js'></script>
+    <script src='js/box2d/dynamics/joints/b2PulleyJoint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2PulleyJointDef.js'></script>
+    <script src='js/box2d/dynamics/joints/b2RevoluteJoint.js'></script>
+    <script src='js/box2d/dynamics/joints/b2RevoluteJointDef.js'></script>
+	
+    <meta name="viewport" content="width=default-width; user-scalable=no" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+	
+	<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+	
+    <script type="text/javascript" charset="utf-8" src="gamegap.js"></script>
+
+	
+ </head>
+<body>
+
+Box 2d test
+
+<script>
+
+
+
+
+PhoneGap.exec('GameGap.initAndDisplayGameView',320,480);
+
+var worldAABB = new b2AABB();
+worldAABB.minVertex.Set(-300, -300);
+worldAABB.maxVertex.Set(500, 500);
+var gravity = new b2Vec2(0, 300);
+var doSleep = true;
+var world = new b2World(worldAABB, gravity, doSleep); 
+
+
+// Ball
+var ballSd = new b2CircleDef();
+ballSd.density = .7;
+ballSd.radius = 10;
+ballSd.restitution = 0.9;
+var ballBd = new b2BodyDef();
+ballBd.AddShape(ballSd);
+ballBd.position.Set(75,-250);
+var theball = world.CreateBody(ballBd);
+PhoneGap.exec('GameGap.createSprite', 'ball1', 50,44,'cube1.png');
+
+
+// ----------------------
+// blocks
+var sd = new b2BoxDef();
+var bd = new b2BodyDef();
+bd.AddShape(sd);
+sd.density = 1.0;
+sd.friction = 0.8;
+sd.restitution = 1.1;
+sd.extents.Set(10, 10);
+var i;
+boxCount = 8;
+var theBlocks=new Array();
+for (i = 0; i < boxCount; i++) {
+	bd.position.Set(320/2 - Math.random() * 100, -50 + (Math.random() * 100));
+	var block = world.CreateBody(bd);
+	theBlocks[i] = block;
+	PhoneGap.exec('GameGap.createSprite', 'block' + i, 50,44,'cube1.png');
+}
+// ----------------------
+
+
+
+// Ground
+var groundSd = new b2BoxDef();
+groundSd.extents.Set(300, 50);
+groundSd.restitution = 0.2;
+var groundBd = new b2BodyDef();
+groundBd.AddShape(groundSd);
+groundBd.position.Set(0, 470);
+world.CreateBody(groundBd);
+
+var sideLSd = new b2BoxDef();
+sideLSd.extents.Set(20, 500);
+sideLSd.restitution = 0.2;
+var sideLBd = new b2BodyDef();
+sideLBd.AddShape(sideLSd);
+sideLBd.position.Set(0, 0);
+world.CreateBody(sideLBd);
+
+var sideRSd = new b2BoxDef();
+sideRSd.extents.Set(20, 500);
+sideRSd.restitution = 0.2;
+var sideRBd = new b2BodyDef();
+sideRBd.AddShape(sideRSd);
+sideRBd.position.Set(310, 0);
+world.CreateBody(sideRBd);
+
+var timeStep = 1/20;
+var iteration = 1;
+world.Step(timeStep, iteration);
+
+
+	function getPhoneGapURL()
+	{
+		var args = arguments;
+		var uri = [];
+		var dict = null;
+		for (var i = 1; i < args.length; i++) {
+			var arg = args[i];
+			if (arg == undefined || arg == null)
+				arg = '';
+			if (typeof(arg) == 'object')
+				dict = arg;
+			else
+				uri.push(encodeURIComponent(arg));
+		}
+		var url = "gap://" + args[0] + "/" + uri.join("/");
+		if (dict != null) {
+			var query_args = [];
+			for (var name in dict) {
+				if (typeof(name) != 'string')
+					continue;
+				query_args.push(encodeURIComponent(name) + "=" + encodeURIComponent(dict[name]));
+			}
+			if (query_args.length > 0)
+				url += "?" + query_args.join("&");
+		}
+		return url;
+	}
+
+
+
+GameGap_NextFrame = function()
+{
+	return step();
+}
+
+function step(cnt) 
+{
+  var args = new Array();
+
+  world.Step(timeStep, iteration);
+  args.push ('GameGap.setPositions');
+  args.push ( "ball1",theball.m_position.x,theball.m_position.y );
+  for (i = 0; i < boxCount; i ++ ) {
+	args.push ("block" + i );
+	args.push (theBlocks[i].m_position.x );
+	args.push (theBlocks[i].m_position.y );
+  }
+  //var func = PhoneGap.exec;
+  var func = getPhoneGapURL;
+  var theUrl = func.apply(this,args);
+  return theUrl;
+}
+
+document.onmousedown = function() {
+
+	PhoneGap.exec('GameGap.startGameCallback');
+}
+
+//Event.observe(window, 'load', function() 
+//{
+//  step();
+//  setInterval('step(1)',15);
+//});
+
+</script>
+
+
+</body>
+</html>
