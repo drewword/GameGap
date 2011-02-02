@@ -3,7 +3,7 @@
 //  cocos-gap-iPad
 //
 //  Created by Drew Mayer on 8/17/10.
-//  Copyright 2010 Drew Mayer. All rights reserved.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
 // When you import this file, you import all the cocos2d classes

@@ -3,7 +3,7 @@
 //  cocos-gap-iPad
 //
 //  Created by Drew Mayer on 8/24/10.
-//  Copyright 2010 Drew Mayer. All rights reserved.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
 /*
@@ -40,6 +40,22 @@
 
 
 
+
+@interface MyPoint : NSObject
+{
+	float x;
+	float y;
+}
+@property (nonatomic) float x;
+@property (nonatomic) float y;
+@end
+@implementation MyPoint
+@synthesize x;
+@synthesize y;
+@end
+
+
+
 @implementation GameGap
 
 
@@ -53,61 +69,116 @@
  */
 
 
-- (void)initAndDisplayGameView:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options; 
+- (void)initGameView:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options; 
 {
 	NSUInteger count = [arguments count];
 	if ( count < 2 ) return;
+
+	if ( _scene == nil ) 
+	{
 	
-	_width = [[ arguments objectAtIndex:0] intValue]; 
-	_height = [[ arguments objectAtIndex:1] intValue]; 
+		_width = [[ arguments objectAtIndex:0] intValue]; 
+		_height = [[ arguments objectAtIndex:1] intValue]; 
 	
-	if( ! [CCDirector setDirectorType:CCDirectorTypeDisplayLink] ) {
-		[CCDirector setDirectorType:CCDirectorTypeDefault];
+		if( ! [CCDirector setDirectorType:CCDirectorTypeDisplayLink] ) {
+			[CCDirector setDirectorType:CCDirectorTypeDefault];
+		}
+	
+		// Use RGBA_8888 buffers
+		// Default is: RGB_565 buffers
+		[[CCDirector sharedDirector] setPixelFormat:kPixelFormatRGBA8888];
+	
+		// Default texture format for PNG/BMP/TIFF/JPEG/GIF images
+		// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565
+		// You can change anytime.
+		[CCTexture2D setDefaultAlphaPixelFormat:kTexture2DPixelFormat_RGBA8888];
+		//[CCTexture2D setDefaultAlphaPixelFormat:kTexture2DPixelFormat_RGBA4444];
+	
+		// before creating any layer, set the landscape mode
+		//[[CCDirector sharedDirector] setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
+		[[CCDirector sharedDirector] setAnimationInterval:1.0/60];
+		//[[CCDirector sharedDirector] setDisplayFPS:YES];
+	
+		_scene = [GameGapLayer scene];
+		
+		// 'layer' is an autorelease object.
+		layer = [GameGapLayer node];
+		
+		// add layer as a child to scene
+		[_scene addChild: layer];
+		
+		layer->_gameGap = self;
+
+		[[CCDirector sharedDirector] runWithScene: _scene];
+		
+		_touchPointsToRects = [[NSMutableDictionary alloc] initWithCapacity:10];
+		
+
+		[self.webView.superview setMultipleTouchEnabled: YES];
+		
+		
 	}
-	
-	// Use RGBA_8888 buffers
-	// Default is: RGB_565 buffers
-	[[CCDirector sharedDirector] setPixelFormat:kPixelFormatRGBA8888];
-	
-	// Default texture format for PNG/BMP/TIFF/JPEG/GIF images
-	// It can be RGBA8888, RGBA4444, RGB5_A1, RGB565
-	// You can change anytime.
-	//[CCTexture2D setDefaultAlphaPixelFormat:kTexture2DPixelFormat_RGBA8888];
-	[CCTexture2D setDefaultAlphaPixelFormat:kTexture2DPixelFormat_RGBA4444];
-	
-	// before creating any layer, set the landscape mode
-	//[[CCDirector sharedDirector] setDeviceOrientation:CCDeviceOrientationLandscapeLeft];
-	[[CCDirector sharedDirector] setAnimationInterval:1.0/60];
-	//[[CCDirector sharedDirector] setDisplayFPS:YES];
-	
-	// create an openGL view inside a window
+
 	[[CCDirector sharedDirector] attachInView:self.webView.superview];
+	[[CCDirector sharedDirector] resume];
 	
-	_scene = [GameGapLayer scene];
+	[self.webView.superview bringSubviewToFront:webView];
 	
-	// 'layer' is an autorelease object.
-	layer = [GameGapLayer node];
-	
-	// add layer as a child to scene
-	[_scene addChild: layer];
-	
-	layer->_gameGap = self;
-	
-	[[CCDirector sharedDirector] runWithScene: _scene];
-	
+}
 
-	// ---------------------------------------
-	
-	// Try running with a timer
-	//[NSTimer scheduledTimerWithTimeInterval:.005f
-	//								 target:self
-	//							     selector:@selector(updateTimer:)
-	//							     userInfo:nil
-	//								 repeats:YES];	
-	
-	
-	// -------------------------------------
 
+-(void)displayGameView:(NSMutableArray *)arguments withDict:(NSMutableDictionary *)options
+{
+	//[[CCDirector sharedDirector] attachInView:self.webView.superview];
+	//[[CCDirector sharedDirector] attachInView:self.webView.superview];
+	//[[CCDirector sharedDirector] resume];
+	
+	[self.webView.superview sendSubviewToBack:webView];
+}
+
+
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ 
+ hideGameView
+ 
+ */
+
+- (void)hideGameView:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+{
+	//[self clearSprites];
+	//[[CCDirector sharedDirector] stopAnimation];
+	//[[CCDirector sharedDirector] dealloc];
+
+	[self.webView.superview bringSubviewToFront:webView];
+	
+	//[[[CCDirector sharedDirector] openGLView] removeFromSuperview];
+	
+}
+
+
+
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ 
+ setBackgroundTilemap
+ www/tilemap.tmx
+ 
+ */
+
+
+- (void)setBackgroundTilemap:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+{
+	NSUInteger count = [arguments count];
+	if ( count < 1 ) return;
+	
+	NSString *spriteImage = [arguments objectAtIndex:0];
+	spriteImage = [@"www/" stringByAppendingString:spriteImage];
+
+	_tileMap = [CCTMXTiledMap tiledMapWithTMXFile:spriteImage];
+	_background = [_tileMap layerNamed:@"Background"];
+	[_scene addChild:_tileMap z:-1];
+	
+ 	[_background setPosition:ccp(0,0)];
+	
 }
 
 
@@ -120,7 +191,28 @@
 
 - (void)startGameCallback:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 {
-	[layer schedule:@selector(nextFrame:)];		
+	
+	[super writeJavascript:@"var e = document.createEvent('Events'); e.initEvent(\'gameGapTimerStart\');document.dispatchEvent(e);"];
+
+	// make sure we dont run multiple timers
+	[layer unschedule:@selector(nextFrame:)];
+	
+	
+	[layer schedule:@selector(nextFrame:)];	
+	
+	
+	// THIS IS Needed in the case if we are going to support on resume + 
+	// active, etc.  Otherwise, lets avoid it.
+	// on resume
+	//[[CCDirector sharedDirector] stopAnimation];
+	//[[CCDirector sharedDirector] resume];
+	//[[CCDirector sharedDirector] startAnimation];
+	
+	
+	
+	// OLD STUFF
+	//[[SimpleAudioEngine sharedEngine] init];
+
 }
 
 
@@ -135,7 +227,11 @@
 
 - (void)stopGameCallback:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options;
 {
-		
+	// NOTE: Could also use pause and resume.
+	[layer unschedule:@selector(nextFrame:)];
+	
+	//[[SimpleAudioEngine sharedEngine] pauseBackgroundMusic];
+	
 }
 
 
@@ -149,20 +245,155 @@
 
 -(void)nextFrame:(ccTime)dt
 {
+	// Commands will come in with a number + the arguments.  First need to split the
+	// commands up.
+	
+	NSString *jsString = [NSString stringWithFormat:@"GameGap_NextFrame(%4.8f)", dt];
+	NSString *jsCommandData = [super.webView stringByEvaluatingJavaScriptFromString:jsString];
+	
+	if ( jsCommandData == nil ) return;
+	
+	//NSLog(@"Str: %@", jsCommandData);
 
-	NSString *jsString = [NSString stringWithFormat:@"GameGap_NextFrame(%4.6f)", dt];
-	//NSLog(@"Str: %@", jsString);
+	NSArray *commands = [jsCommandData componentsSeparatedByString:COMMAND_SEPARATOR];
+	if ( commands == nil ) return;
+
+	BOOL bDeleteAllAndHalt = FALSE;
 	
-	NSString *theURL = [super.webView stringByEvaluatingJavaScriptFromString:jsString];
-	NSURL *drainURL = [NSURL URLWithString:theURL];
+	for (NSString *command in commands) 
+	{
+		//NSLog(@"Command: %@", command );
+		if ( command == nil ) continue;
+		NSArray *commandPieces = [command componentsSeparatedByString:COMMAND_PARAM_SEPARATOR];
+		if ( commandPieces == nil ) continue;
+		
+		int pieceslen = [commandPieces count];
+		if ( pieceslen == 0 ) continue;
+		int command = [[commandPieces objectAtIndex:0] intValue];
+
+		pieceslen -= 2; // 1 for nil at end, 1 for the actual command (MOVE_SPRITE)
+		// We have a command, run it.
+		switch (command) 
+		{
+			case MOVE_SPRITE:
+			{
+				// The signature for the command is
+				// -spriteName
+				// -xpos
+				// -ypos 
+				//  with as many repeating scenarios as that...
+				NSMutableArray *pgCommand = [[NSMutableArray alloc] initWithCapacity:20];
+				for ( int pc = 1; pc < pieceslen; pc += 3 )
+				{
+					NSString *spriteName = [commandPieces objectAtIndex:pc];
+					int xpos = [[commandPieces objectAtIndex:pc + 1] intValue];
+					int ypos = [[commandPieces objectAtIndex:pc + 2] intValue]; 
+					//NSLog(@"move spritZ %@ %i %i", spriteName, xpos, ypos);
+					
+					[pgCommand addObject:spriteName];
+					[pgCommand addObject:[NSNumber numberWithInteger:xpos]];
+					[pgCommand addObject:[NSNumber numberWithInteger:ypos]];
+				}
+				
+				// Call out to move the sprite.
+				[self setPositions:pgCommand withDict:nil];
+				[pgCommand release];
+				break;
+			}
+			case SET_SPRITE_IMAGE:
+			{
+				NSString *spriteName = [commandPieces objectAtIndex:1];
+				NSString *imageName = [commandPieces objectAtIndex:2];
+				NSMutableArray *pgCommand = [[NSMutableArray alloc] initWithObjects:
+											 spriteName, imageName, nil];
+				
+				[self setSpriteImage:pgCommand withDict:nil];
+				[pgCommand release];
+				
+				break;
+			}
+			case CREATE_SPRITE:
+			{
+				NSString *spriteKey = [commandPieces objectAtIndex:1];
+				NSString *width = [commandPieces objectAtIndex:2]; //[[commandPieces objectAtIndex:2] intValue];
+				NSString *height = [commandPieces objectAtIndex:3]; //[[commandPieces objectAtIndex:3] intValue];
+				NSString *imageName = [commandPieces objectAtIndex:4];
+				
+				NSMutableArray *pgCommand = [[NSMutableArray alloc] initWithObjects:
+											  spriteKey, width, height, imageName, nil ];
+				[self createSprite:pgCommand withDict:nil];
+				[pgCommand release];
+				
+				break;
+			}
+			case PLAY_EFFECT:
+			{
+				NSString *sound = [commandPieces objectAtIndex:1];
+				sound = [@"www/" stringByAppendingString:sound];
+
+				[[SimpleAudioEngine sharedEngine] playEffect:sound];
+				break;
+			}
+			case PLAY_BACKGROUND_MUSIC:
+			{
+				NSString *sound = [commandPieces objectAtIndex:1];
+				sound = [@"www/" stringByAppendingString:sound];
+				
+				[[SimpleAudioEngine sharedEngine] playBackgroundMusic:sound];
+				break;
+			}
+			case STOP_BACKGROUND_MUSIC:
+			{
+				[[SimpleAudioEngine sharedEngine] stopBackgroundMusic];
+				break;
+			}
+			case PAUSE_BACKGROUND_MUSIC:
+			{
+				[[SimpleAudioEngine sharedEngine] pauseBackgroundMusic];
+				break;
+			}
+			case RESUME_BACKGROUND_MUSIC:
+			{
+				[[SimpleAudioEngine sharedEngine] resumeBackgroundMusic];
+				break;
+			}
+			case DELETE_SPRITE:
+			{
+				NSString *spriteKey = [commandPieces objectAtIndex:1];
+				CCSprite* spriteToRemove = [_sprites objectForKey:spriteKey];
+				if ( spriteToRemove != nil )
+				{
+					[_sprites removeObjectForKey:spriteToRemove];
+					[_scene removeChild:spriteToRemove cleanup:YES];
+				}
+				break;
+			}
+			case DELETE_SPRITE_AND_STOP_ENGINE:
+			{
+				bDeleteAllAndHalt = TRUE; // Go ahead and do everything else first
+				break;
+			}
+			default:
+			{
+				break;
+			}	
+		}
+		
+		if ( bDeleteAllAndHalt )
+		{
+			NSEnumerator* myIterator = [_sprites objectEnumerator];
+			id anObject;
+			while( anObject = [myIterator nextObject])
+			{
+				[_scene removeChild:(CCNode*)anObject cleanup:YES];
+			}	
+			[_sprites removeAllObjects];
+			[layer unschedule:@selector(nextFrame:)];
+		}
+		
+	}
 	
-	//NSLog(@"Drain URL: %@", drainURL);
-	
-	InvokedUrlCommand* iucDrain = [[InvokedUrlCommand newFromUrl:drainURL] autorelease];
-	
-	PhoneGapDelegate *appDelegate = (PhoneGapDelegate *)[[UIApplication sharedApplication] delegate];	
-	
-	[appDelegate execute:iucDrain];
+
 	
 }
 
@@ -189,11 +420,16 @@
 	int width = [[ arguments objectAtIndex:1] intValue]; 
 	int height = [[ arguments objectAtIndex:2] intValue]; 
 	NSString *spriteImage = [arguments objectAtIndex:3];
-	
+
+	if ( spriteImage == nil ) {
+		return;
+	}
+	if ( [spriteImage length] == 0 ) {
+		return;
+	}
 	if (_sprites == nil) {
 		_sprites = [[NSMutableDictionary alloc] initWithCapacity:10];
 	}
-	
 	spriteImage = [@"www/" stringByAppendingString:spriteImage];
 
 	CCSprite *newSprite = [CCSprite spriteWithFile:spriteImage rect:CGRectMake(0,0,width,height)];
@@ -203,12 +439,67 @@
 	}
 	newSprite.position = ccp(-100, -100);
 	
-	NSLog(@"Created sprite key '%@' with image: '%@'", spriteKey, spriteImage);
+	//NSLog(@"Created sprite key '%@' with image: '%@'", spriteKey, spriteImage);
 	
 	[_sprites setObject:newSprite forKey:spriteKey];
 	
 	[_scene addChild:newSprite];
 	
+	
+}
+
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ 
+ createMultipleSprites
+ 
+ Arguments:
+ -spriteKey
+ -width
+ -height
+ -initial image
+ 
+ */
+
+- (void)createMultipleSprites:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+{
+	NSUInteger count = [arguments count];
+	if ( count == 0 ) return;
+
+	// Split apart and call createSprite
+	NSString *jsCommandData = [arguments objectAtIndex:0];
+
+	NSArray *spriteData = [jsCommandData componentsSeparatedByString:COMMAND_SEPARATOR];
+	if ( spriteData == nil ) return;
+	
+	for (NSString *data in spriteData) 
+	{
+		//NSLog(@"Command: %@", command );
+		
+		NSArray *spritePieces = [data componentsSeparatedByString:COMMAND_PARAM_SEPARATOR];
+		int pieceslen = [spritePieces count];
+		if ( pieceslen == 0 ) continue;
+		
+		NSString *spriteKey = [spritePieces objectAtIndex:0];
+		NSString *width = [spritePieces objectAtIndex:1];
+		NSString *height = [spritePieces objectAtIndex:2];
+		NSString *x = [spritePieces objectAtIndex:3];
+		NSString *y = [spritePieces objectAtIndex:4];
+		NSString *spriteImage = [spritePieces objectAtIndex:5];
+		
+		NSMutableArray *pgCommand = [[NSMutableArray alloc] initWithObjects:
+									 spriteKey, width, height, spriteImage, nil];
+		
+		[self createSprite:pgCommand withDict:nil];
+		[pgCommand release];
+		
+		pgCommand = [[NSMutableArray alloc] initWithObjects:
+							 spriteKey, x,y, nil];
+		
+		[self setPositions:pgCommand withDict:nil];
+		[pgCommand release];
+		
+
+	}
 	
 }
 
@@ -242,6 +533,26 @@
 
 }
 
+/* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ 
+ setSpriteImage
+ 
+ Arguments:
+ -spriteKey
+ -spriteImage
+ 
+ */
+
+- (void)preloadSpriteImage:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+{
+	NSUInteger count = [arguments count];
+	if ( count < 1 ) return;
+	
+	NSString *spriteImage = [arguments objectAtIndex:0];
+	
+	[[CCTextureCache sharedTextureCache] addImage:spriteImage];
+}
+
 
 
 /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -268,7 +579,7 @@
 	
 	[_scene reorderChild:spriteToMove z:zOrder];
 	
-	NSLog(@"Set Z order for sprite '%@'", spriteKey);
+	//NSLog(@"Set Z order for sprite '%@'", spriteKey);
 	
 }
 
@@ -287,11 +598,34 @@
 	NSUInteger count = [arguments count];
 	if ( count < 1 ) return;
 	NSString *spritKey = [arguments objectAtIndex:0];
+	//NSLog(@"Delete sprite '%@'", spritKey);
+	
 	CCSprite* spriteToRemove = [_sprites objectForKey:spritKey];
 	if ( spriteToRemove == nil ) return;
 	[_sprites removeObjectForKey:spriteToRemove];
 	[_scene removeChild:spriteToRemove cleanup:YES];
 }
+
+- (void)deleteMultipleSprites:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options
+{
+	NSUInteger count = [arguments count];
+	if ( count < 1 ) return;
+	NSString *jsCommandData = [arguments objectAtIndex:0];
+	
+	NSArray *spriteData = [jsCommandData componentsSeparatedByString:COMMAND_SEPARATOR];
+	if ( spriteData == nil ) return;
+	
+	for (NSString *data in spriteData) 
+	{
+		NSMutableArray *pgCommand = [[NSMutableArray alloc] initWithObjects:
+									 data, nil];
+		
+		[self deleteSprite:pgCommand withDict:nil];
+		[pgCommand release];
+		
+	}
+}
+
 
 
 /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -320,6 +654,8 @@
 		n++;
 		int y = [[ arguments objectAtIndex:n] intValue]; 
 
+		//NSLog(@"move sprite %@ %i %i", spritKey, x, y);
+		
 		y = _height - y;
 		CCSprite* spriteToMove = [_sprites objectForKey:spritKey];
 		if ( spriteToMove == nil ) continue;
@@ -339,7 +675,7 @@
 
 /* @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
  
- setPositions
+ setGameDisplayTransparent
  
  Arguments:
  -spriteKey
@@ -370,64 +706,218 @@
 
 - (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-	UITouch *touch = [touches anyObject];
 	
-	if( touch ) 
+	//UITouch *touch = [touches anyObject]; // grab a single touch.
+	NSSet *allTouches = [event allTouches];  // <--this gets all the current touches
+	
+	if( allTouches ) // touch 
 	{
-		CGPoint location = [touch locationInView: [touch view]];
-		// IMPORTANT:
-		// The touches are always in "portrait" coordinates. You need to convert them to your current orientation
-		CGPoint convertedPoint = [[CCDirector sharedDirector] convertToGL:location];
+		for (UITouch *touch in allTouches) 
+		{ 
+			if ( touch.phase != UITouchPhaseBegan ) {
+				continue;
+			}
+			
+			// IMPORTANT:
+			// The touches are always in "portrait" coordinates. You need to convert them to your current orientation
+			CGPoint location = [touch locationInView: [touch view]];
+			
+			// -------------------------------
+			//NSValue *originalPoint = [NSValue valueWithCGPoint:CGPointMake(location.x, location.y)];			
+			MyPoint *originalPoint = [[MyPoint alloc] init];
+			originalPoint.x = location.x;
+			originalPoint.y = location.y;
+			NSString *touchPtrStr = [NSString stringWithFormat:@"0x%08x", touch];
+			
+			[_touchPointsToRects setValue:originalPoint forKey:touchPtrStr];
+			//[_touchPointsToRects setObject:originalPoint forKey:touch];
+			// -------------------------------
+			
+			// Store the points to get them for mouse up.
+			CGPoint convertedPoint = [[CCDirector sharedDirector] convertToGL:location];
+
+			//NSLog(@"touch began:%@ %2f",touchPtrStr, location.x);
+			
+			NSString *jsString = [NSString stringWithFormat:@"var elem = document.elementFromPoint (%i,%i);"
+								  "var evt = document.createEvent(\"MouseEvents\");"
+								  "evt.initMouseEvent(\"mousedown\", true, true, window,"
+								  "0, %i, %i, %i, %i, false, false, false, false, 0, null);"
+								  "elem.dispatchEvent(evt);"		, 
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y),
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y),
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y)]; 
+			
+			//NSLog(@"%@",jsString);
+			[super writeJavascript:jsString];
+			
+		}		
 		
-		
-		NSString *jsString = [NSString stringWithFormat:@"var elem = document.elementFromPoint (%i,%i);"
-							  "var evt = document.createEvent(\"MouseEvents\");"
-							  "evt.initMouseEvent(\"mousedown\", true, true, window,"
-							  "0, 0, 0, 0, 0, false, false, false, false, 0, null);"
-							  "elem.dispatchEvent(evt);"		, 
-							  (int)convertedPoint.x, (int)(_height - convertedPoint.y)]; 
-		
-		//NSLog(@"%@",jsString);
-		[super writeJavascript:jsString];
 	}
+	
 }
+
+
+
+
+- (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	//UITouch *touch = [touches anyObject]; // grab a single touch.
+	NSSet *allTouches = [event allTouches];  // <--this gets all the current touches
+	
+	if( allTouches ) // touch 
+	{
+		for (UITouch *touch in allTouches) 
+		{
+			if ( touch.phase != UITouchPhaseEnded ) {
+				continue;
+			}
+			CGPoint location = [touch locationInView: [touch view]];
+			
+			// -------------------------------
+			NSString *touchPtrStr = [NSString stringWithFormat:@"0x%08x", touch];
+			
+			MyPoint *thePoint = [_touchPointsToRects objectForKey:touchPtrStr];
+			if ( thePoint != nil ) {
+				location.x = thePoint.x;
+				location.y = thePoint.y;
+				[_touchPointsToRects removeObjectForKey:touchPtrStr];
+				[thePoint release];
+			}
+			
+			//NSValue *val = [_touchPointsToRects objectForKey:touch];
+			//CGPoint location = [val CGPointValue];
+			// -------------------------------
+			
+			// IMPORTANT:
+			// The touches are always in "portrait" coordinates. You need to convert them to your current orientation
+			CGPoint convertedPoint = [[CCDirector sharedDirector] convertToGL:location];
+
+			int convertedX = convertedPoint.x;
+			int convertedY = _height - convertedPoint.y;
+
+			//NSLog(@"touch end: %@ %2f",touchPtrStr, location.x);
+			
+			/*
+			if ( convertedX < 0 ) convertedX = 4;
+			if ( convertedY < 0 ) convertedY = 4;
+			if ( convertedX > _width ) convertedX = _width - 4;
+			if ( convertedY > _height ) convertedY = _height - 4;
+			 */
+			
+			NSString *jsString = [NSString stringWithFormat:@"var elem = document.elementFromPoint (%i,%i);"
+								"var evt = document.createEvent(\"MouseEvents\");"
+								"evt.initMouseEvent(\"mouseup\", true, true, window,"
+												"0, %i, %i, %i, %i, false, false, false, false, 0, null);"
+							    "elem.dispatchEvent(evt);"		, 
+								 convertedX , convertedY,
+								convertedX , convertedY,
+								convertedX , convertedY,
+								convertedX , convertedY]; 
+		
+			//NSLog(@"%@",jsString);
+			[super writeJavascript:jsString];
+		}
+	}
+	
+}
+
+
+- (void)ccTouchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	//UITouch *touch = [touches anyObject]; // grab a single touch.
+	NSSet *allTouches = [event allTouches];  // <--this gets all the current touches
+	
+	if( allTouches ) // touch 
+	{
+		for (UITouch *touch in allTouches) 
+		{ 
+			CGPoint location = [touch locationInView: [touch view]];
+
+			
+			// -------------------------------
+			NSString *touchPtrStr = [NSString stringWithFormat:@"0x%08x", touch];
+			MyPoint *thePoint = [_touchPointsToRects objectForKey:touchPtrStr];
+			if ( thePoint != nil ) {
+				location.x = thePoint.x;
+				location.y = thePoint.y;
+				[_touchPointsToRects removeObjectForKey:touchPtrStr];
+				[thePoint release];
+			}
+			// -------------------------------
+			
+			// IMPORTANT:
+			// The touches are always in "portrait" coordinates. You need to convert them to your current orientation
+			CGPoint convertedPoint = [[CCDirector sharedDirector] convertToGL:location];
+			
+			int convertedX = convertedPoint.x;
+			int convertedY = _height - convertedPoint.y;
+			
+			if ( convertedX < 0 ) convertedX = 4;
+			if ( convertedY < 0 ) convertedY = 4;
+			if ( convertedX > _width ) convertedX = _width - 4;
+			if ( convertedY > _height ) convertedY = _height - 4;
+			
+			
+			NSString *jsString = [NSString stringWithFormat:@"var elem = document.elementFromPoint (%i,%i);"
+								  "var evt = document.createEvent(\"MouseEvents\");"
+								  "evt.initMouseEvent(\"mouseup\", true, true, window,"
+								  "0, %i, %i, %i, %i, false, false, false, false, 0, null);"
+								  "elem.dispatchEvent(evt);"		, 
+								  convertedX, convertedY,
+								  convertedX, convertedY,
+								  convertedX, convertedY,
+								  convertedX, convertedY]; 
+			
+			//NSLog(@"%@",jsString);
+			[super writeJavascript:jsString];
+		}
+	}
+	
+}
+
+
 
 
 - (void)ccTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
+	//UITouch *touch = [touches anyObject]; // grab a single touch.
 	
-}
-
-- (void)ccTouchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
-{
+	/*
+	 
+	// NOTE:  Touches moved can be re-enabled if desired.
+	// My thought is that it may be expensive, constantly calling
+	// into the web view.
+	 
+	NSSet *allTouches = [event allTouches];  // <--this gets all the current touches
 	
-}
-
-- (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
-{
-	UITouch *touch = [touches anyObject];
-	
-	if( touch ) 
+	if( allTouches ) // touch 
 	{
-		CGPoint location = [touch locationInView: [touch view]];
-		// IMPORTANT:
-		// The touches are always in "portrait" coordinates. You need to convert them to your current orientation
-		CGPoint convertedPoint = [[CCDirector sharedDirector] convertToGL:location];
-
-							 
-		NSString *jsString = [NSString stringWithFormat:@"var elem = document.elementFromPoint (%i,%i);"
-								"var evt = document.createEvent(\"MouseEvents\");"
-								"evt.initMouseEvent(\"mouseup\", true, true, window,"
-												"0, 0, 0, 0, 0, false, false, false, false, 0, null);"
-							    "elem.dispatchEvent(evt);"		, 
-							 (int)convertedPoint.x, (int)(_height - convertedPoint.y)]; 
-		
-		//NSLog(@"%@",jsString);
-		[super writeJavascript:jsString];
+		for (UITouch *touch in allTouches) 
+		{ 
+			//CGPoint location = [touch locationInView: [touch view]];
+			CGPoint location = [touch locationInView: [touch view]];
+			
+			// IMPORTANT:
+			// The touches are always in "portrait" coordinates. You need to convert them to your current orientation
+			CGPoint convertedPoint = [[CCDirector sharedDirector] convertToGL:location];
+			
+			
+			NSString *jsString = [NSString stringWithFormat:@"var elem = document.elementFromPoint (%i,%i);"
+								  "var evt = document.createEvent(\"MouseEvents\");"
+								  "evt.initMouseEvent(\"mousemove\", true, true, window,"
+								  "0, %i, %i, %i, %i, false, false, false, false, 0, null);"
+								  "elem.dispatchEvent(evt);"		, 
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y),
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y),
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y),
+								  (int)convertedPoint.x, (int)(_height - convertedPoint.y)]; 
+			
+			//NSLog(@"%@",jsString);
+			[super writeJavascript:jsString];
+		}
 	}
-	
+	*/
 }
-
 
 
 - (void)updateTimer:(NSTimer *)theTimer
@@ -448,6 +938,9 @@
 	[self clearSprites];
 	[_scene release];
 	_scene = nil;
+	
+	[_touchPointsToRects release];
+	
 	[super dealloc];
 }
 
@@ -467,7 +960,13 @@
 		[_sprites release];
 		_sprites = nil;
 	}	
-	
+	if ( _tileMap != nil ) {
+		[_tileMap release];
+	}
+	if ( _background != nil ) {
+		[_background release];
+	}
+
 }
 
 @end

@@ -3,7 +3,7 @@
 //  cocos-gap-iPad
 //
 //  Created by Drew Mayer on 8/17/10.
-//  Copyright 2010 Drew Mayer. All rights reserved.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
 // Import the interfaces
@@ -36,7 +36,6 @@
 	if ( (self=[super init] ))
 	{
 		self.isTouchEnabled = YES;
-		
 	}
 	
 	
@@ -61,6 +60,16 @@
 
 //- (void)ccTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
 //- (void)ccTouchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event;
+
+- (void)ccTouchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[_gameGap ccTouchesCancelled:touches withEvent:event];
+}
+
+- (void)ccTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[_gameGap ccTouchesMoved:touches withEvent:event];
+}
 
 - (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
